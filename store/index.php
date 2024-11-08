@@ -15,6 +15,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
+
+$conn = new mysqli("localhost", "root", "", "toko_elektronik");
+if ($conn->connect_error) {
+    die("Koneksi gagal: " . $conn->connect_error);
+}
+
+$product_name = "";
+$sql = "SELECT * FROM products";
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search_term'])) {
+    $product_name = $conn->real_escape_string($_POST['search_term']);
+    $sql = "SELECT * FROM products WHERE product_name LIKE '%$product_name%'";
+}
+$result = $conn->query($sql);
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -37,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
                     ?>
                 </li>
             </ul>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Cari handphone..." aria-label="Search">
+            <form class="d-flex" role="search" method="post">
+                <input class="form-control me-2" type="search" name="search_term" placeholder="Cari handphone..." aria-label="Search" value="<?php echo htmlspecialchars($product_name); ?>">
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
         </div>
@@ -57,14 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
 <div class="container mt-5">
     <div class="row">
         <?php
-        $conn = new mysqli("localhost", "root", "", "toko_elektronik");
-        if ($conn->connect_error) {
-            die("Koneksi gagal: " . $conn->connect_error);
-        }
-
-        $sql = "SELECT * FROM products";
-        $result = $conn->query($sql);
-
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 echo '<div class="col-md-4 mb-4">';
@@ -87,7 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
         } else {
             echo '<div class="col-12 text-center">Tidak ada produk ditemukan</div>';
         }
-
         $conn->close();
         ?>
     </div>

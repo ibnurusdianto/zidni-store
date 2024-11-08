@@ -17,6 +17,20 @@ if (!isset($_SESSION['username'])) {
 }
 
 $logout_message = isset($_GET['logout_message']) ? $_GET['logout_message'] : '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['command'])) {
+    $conn = new mysqli("localhost", "root", "", "toko_elektronik");
+    if ($conn->connect_error) {
+        die("Koneksi gagal: " . $conn->connect_error);
+    }
+    $command = $_POST['command'];
+    if ($conn->query($command)) {
+        $status = "Perintah berhasil dieksekusi.";
+    } else {
+        $status = "Error: " . $conn->error;
+    }
+    $conn->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -177,8 +191,10 @@ $logout_message = isset($_GET['logout_message']) ? $_GET['logout_message'] : '';
     <div class="card mb-3">
         <div class="card-body">
             <h5 class="card-title">Eksekusi Perintah</h5>
-            <textarea class="form-control" rows="4" placeholder="Masukkan perintah di sini..."></textarea>
-            <button class="btn btn-primary mt-3">Eksekusi</button>
+            <form method="POST" action="">
+                <textarea name="command" class="form-control" rows="4" placeholder="Masukkan perintah di sini..." required></textarea>
+                <button type="submit" class="btn btn-primary mt-3">Eksekusi</button>
+            </form>
         </div>
     </div>
 </div>
